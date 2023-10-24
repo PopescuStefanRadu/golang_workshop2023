@@ -46,4 +46,16 @@ func TestNPE(t *testing.T) {
 	fmt.Println(*s)
 }
 
-//func Test
+func TestMutationThroughPtr(t *testing.T) {
+	type Vertex struct {
+		X, Y int
+	}
+	v1 := &Vertex{X: 1, Y: 1}
+	v1.X = 3
+	assert.Equal(t, 3, v1.X)
+	(*v1).X = 4
+	assert.Equal(t, 4, v1.X)
+	v1Deref := *v1
+	v1Deref.X = 5
+	assert.Equal(t, 5, v1.X)
+}

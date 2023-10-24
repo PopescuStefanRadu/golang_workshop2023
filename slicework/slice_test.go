@@ -2,6 +2,7 @@ package slicework_test
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"slices"
 	"testing"
@@ -108,4 +109,21 @@ func TestPerformance(_ *testing.T) {
 			fmt.Println("latestCapacity", latestCapacity)
 		}
 	}
+}
+
+func TestMutabilityThroughAccessPatterns(t *testing.T) {
+	type Vertex struct {
+		X, Y int
+	}
+
+	vs := make([]Vertex, 3)
+	for _, v := range vs {
+		v.X++
+	}
+	assert.Equal(t, []Vertex{{X: 1}, {X: 1}, {X: 1}}, vs)
+
+	for i := range vs {
+		vs[i].X++
+	}
+	assert.Equal(t, []Vertex{{X: 1}, {X: 1}, {X: 1}}, vs)
 }

@@ -17,3 +17,4 @@ func GreetWorld() string {
 // TODO why are arrays not able to be used as constants
 // TODO labels
 // TODO TestMain, *testing.M
+// TODO why should an error implementation use pointer receiver for Error() string
