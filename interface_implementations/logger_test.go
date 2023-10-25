@@ -1,4 +1,4 @@
-package randomex
+package interface_implementations_test
 
 import (
 	"encoding/json"

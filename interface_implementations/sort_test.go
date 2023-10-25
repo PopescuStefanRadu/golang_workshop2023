@@ -1,33 +1,12 @@
-package randomex
+package interface_implementations_test
 
 import (
+	"esol/interface_implementations"
 	"fmt"
 	"github.com/stretchr/testify/require"
 	"sort"
 	"testing"
 )
-
-type IntSliceSorter []int
-
-func (s IntSliceSorter) Len() int {
-	return len(s)
-}
-
-func (s IntSliceSorter) Less(i, j int) bool {
-	if s[i]%2 == 1 && s[j]%2 == 0 { // daca prima este impara, a doua para
-		return true //
-	}
-
-	if s[i]%2 == s[j]%2 {
-		return s[i] < s[j] // comparata egalitatea paritatilor
-	}
-
-	return false
-}
-
-func (s IntSliceSorter) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
 
 func sortUsingSortSort(in []int) {
 	// sortam intai dupa paritate, impar < par
@@ -57,7 +36,7 @@ func TestSorting(t *testing.T) {
 	}
 	for _, td := range testData {
 		t.Run(td.name, func(t *testing.T) {
-			data := IntSliceSorter(td.in)
+			data := interface_implementations.IntSliceSort(td.in)
 			sort.Sort(data)
 			require.Equal(t, td.expect, td.in)
 		})
