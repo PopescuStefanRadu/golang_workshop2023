@@ -1,8 +1,10 @@
 package test
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/ory/dockertest/v3"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -37,4 +39,12 @@ func SetupDBContainer(t *testing.T) (db *sql.DB) {
 		require.NoError(t, db.Close())
 	})
 	return
+}
+
+func ExecContextRaw(ctx context.Context, t *testing.T, db *sql.DB, stmt string, expectedRowsAffected int64) {
+	res, err := db.ExecContext(ctx, stmt)
+	require.NoError(t, err)
+	rowsAff, err := res.RowsAffected()
+	require.NoError(t, err)
+	require.Equal(t, expectedRowsAffected, rowsAff)
 }
