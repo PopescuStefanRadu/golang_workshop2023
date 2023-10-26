@@ -1,12 +1,11 @@
-package database_access_test
+package raw_test
 
 import (
 	"context"
 	"database/sql"
+	"esol/database_access/test"
 	"esol/must"
-	"fmt"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/ory/dockertest/v3"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
@@ -19,9 +18,8 @@ type Car struct {
 }
 
 func TestDatabaseAccess(t *testing.T) {
-	// READ MORE: TestMain
 	var db *sql.DB
-	db = setupDB(t)
+	db = test.SetupDBContainer(t)
 	ctx := context.Background()
 	initializeSchema(t, db, ctx)
 
@@ -59,36 +57,6 @@ func TestDatabaseAccess(t *testing.T) {
 		Model:           "Toyota Yaris XP210",
 		FabricationDate: must.ParseDate("2023-05-02"),
 	}, cars[1])
-}
-
-func setupDB(t *testing.T) (db *sql.DB) {
-	pool, err := dockertest.NewPool("")
-	require.NoError(t, err)
-	require.NoError(t, pool.Client.Ping())
-
-	resource, err := pool.Run("postgres", "16", []string{
-		"POSTGRES_USER=superuser",
-		"POSTGRES_PASSWORD=pass",
-		"POSTGRES_DB=test",
-	})
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, pool.Purge(resource))
-	})
-
-	err = pool.Retry(func() error {
-		var err error
-		db, err = sql.Open("pgx", fmt.Sprintf("postgres://superuser:pass@%s/test", resource.GetHostPort("5432/tcp")))
-		if err != nil {
-			return err
-		}
-		return db.Ping()
-	})
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, db.Close())
-	})
-	return
 }
 
 func initializeSchema(t *testing.T, db *sql.DB, ctx context.Context) {
