@@ -36,6 +36,7 @@ func TestServer(t *testing.T) {
 		}
 		templateNames = append(templateNames, v.Name())
 	}
+	fmt.Println("templateNames", templateNames)
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		listId := r.URL.Query().Get("listId")
@@ -47,11 +48,11 @@ func TestServer(t *testing.T) {
 				{Title: "Task 3", Done: true},
 			},
 		}
-		engine.Option()
 		require.NoError(t, engine.ExecuteTemplate(w, "todo.gohtml", data))
 	}
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
+
 	w := httptest.NewRecorder()
 	handler(w, req)
 

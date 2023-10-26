@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	_ "github.com/jackc/pgx/v5/stdlib"
+	_ "github.com/jackc/pgx/v5/stdlib" // drivername "pgx" atunci cand dati sql.Open("pgx"....)
 	"github.com/ory/dockertest/v3"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-func SetupDBContainer(t *testing.T) (db *sql.DB) {
+func SetupDBContainer(t *testing.T) *sql.DB {
 	// READ MORE: TestMain
 	pool, err := dockertest.NewPool("")
 	require.NoError(t, err)
@@ -26,6 +26,7 @@ func SetupDBContainer(t *testing.T) (db *sql.DB) {
 		require.NoError(t, pool.Purge(resource))
 	})
 
+	var db *sql.DB
 	err = pool.Retry(func() error {
 		var err error
 		db, err = sql.Open("pgx", fmt.Sprintf("postgres://superuser:pass@%s/test", resource.GetHostPort("5432/tcp")))
@@ -38,7 +39,7 @@ func SetupDBContainer(t *testing.T) (db *sql.DB) {
 	t.Cleanup(func() {
 		require.NoError(t, db.Close())
 	})
-	return
+	return db
 }
 
 func ExecContextRaw(ctx context.Context, t *testing.T, db *sql.DB, stmt string, expectedRowsAffected int64) {
