@@ -1,0 +1,9 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "query.question.sql" # ce query-uri sa genereze
+    schema: "schema.sql" # de unde sa isi gaseasca tabelele ca sa stie sa creeze modelele
+    gen:
+      go:
+        package: "tutorial" # cum sa se numeasca pachetul
+        out: "tutorial" # cum sa se numeasca directorul in care pune
