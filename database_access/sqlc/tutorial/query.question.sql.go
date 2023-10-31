@@ -36,9 +36,50 @@ DELETE FROM authors
 WHERE id = $1
 `
 
-func (q *Queries) DeleteAuthor(ctx context.Context, id int64) error {
+func (q *Queries) DeleteAuthor(ctx context.Context, id int32) error {
 	_, err := q.db.ExecContext(ctx, deleteAuthor, id)
 	return err
+}
+
+const findBooksForAuthor = `-- name: FindBooksForAuthor :many
+SELECT authors.id, authors.name, authors.bio, books.id, books.author_id, books.title FROM authors
+LEFT JOIN books ON authors.id = books.author_id
+WHERE authors.id = $1
+`
+
+type FindBooksForAuthorRow struct {
+	Author Author
+	Book   Book
+}
+
+func (q *Queries) FindBooksForAuthor(ctx context.Context, id int32) ([]FindBooksForAuthorRow, error) {
+	rows, err := q.db.QueryContext(ctx, findBooksForAuthor, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FindBooksForAuthorRow
+	for rows.Next() {
+		var i FindBooksForAuthorRow
+		if err := rows.Scan(
+			&i.Author.ID,
+			&i.Author.Name,
+			&i.Author.Bio,
+			&i.Book.ID,
+			&i.Book.AuthorID,
+			&i.Book.Title,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getAuthor = `-- name: GetAuthor :one
@@ -46,7 +87,7 @@ SELECT id, name, bio FROM authors
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetAuthor(ctx context.Context, id int64) (Author, error) {
+func (q *Queries) GetAuthor(ctx context.Context, id int32) (Author, error) {
 	row := q.db.QueryRowContext(ctx, getAuthor, id)
 	var i Author
 	err := row.Scan(&i.ID, &i.Name, &i.Bio)
@@ -91,7 +132,7 @@ WHERE id = $3
 type UpdateAuthorParams struct {
 	Name string
 	Bio  sql.NullString
-	ID   int64
+	ID   int32
 }
 
 func (q *Queries) UpdateAuthor(ctx context.Context, arg UpdateAuthorParams) error {
